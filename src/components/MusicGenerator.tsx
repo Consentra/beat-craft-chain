@@ -4,12 +4,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Music, Wand2, Loader2, Download, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { MusicGenerationService, type GeneratedMusic } from "@/services/musicGeneration";
 
 const MusicGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedMusic, setGeneratedMusic] = useState<GeneratedMusic | null>(null);
+  const [generatedTrack, setGeneratedTrack] = useState<string | null>(null);
   const [duration, setDuration] = useState(10);
   const { toast } = useToast();
 
@@ -25,15 +24,13 @@ const MusicGenerator = () => {
 
     setIsGenerating(true);
     
+    // Simulate AI music generation for now (will be replaced with real API later)
     try {
       console.log('Starting music generation...');
-      const result = await MusicGenerationService.generateMusic({
-        prompt,
-        duration,
-        model: "facebook/musicgen-medium"
-      });
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
-      setGeneratedMusic(result);
+      // For demo purposes, we'll use a placeholder audio URL
+      setGeneratedTrack("https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav");
       
       toast({
         title: "Music Generated!",
@@ -43,7 +40,7 @@ const MusicGenerator = () => {
       console.error('Music generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: error.message || "Failed to generate music. Please try again.",
+        description: "Failed to generate music. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -52,10 +49,10 @@ const MusicGenerator = () => {
   };
 
   const downloadAudio = () => {
-    if (!generatedMusic) return;
+    if (!generatedTrack) return;
     
     const link = document.createElement('a');
-    link.href = generatedMusic.audioData;
+    link.href = generatedTrack;
     link.download = `beatchain-${Date.now()}.wav`;
     document.body.appendChild(link);
     link.click();
@@ -127,7 +124,7 @@ const MusicGenerator = () => {
             )}
           </Button>
 
-          {generatedMusic && (
+          {generatedTrack && (
             <div className="space-y-4 p-6 bg-secondary/20 rounded-lg border border-border/50">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">Generated Track</h3>
@@ -142,13 +139,13 @@ const MusicGenerator = () => {
               </div>
               
               <div className="bg-background/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground mb-2">Prompt: "{generatedMusic.prompt}"</p>
-                <p className="text-xs text-muted-foreground">Model: {generatedMusic.model} • Duration: {generatedMusic.duration}s</p>
+                <p className="text-sm text-muted-foreground mb-2">Prompt: "{prompt}"</p>
+                <p className="text-xs text-muted-foreground">Duration: {duration}s</p>
               </div>
 
               <audio
                 controls
-                src={generatedMusic.audioData}
+                src={generatedTrack}
                 className="w-full"
                 style={{
                   filter: "hue-rotate(270deg) saturate(1.5)",
