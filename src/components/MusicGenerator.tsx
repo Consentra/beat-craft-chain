@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Music, Wand2, Loader2 } from "lucide-react";
+import { Music, Wand2, Loader2, Download, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { MusicGenerationService, type GeneratedMusic } from "@/services/musicGeneration";
 
 const MusicGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedTrack, setGeneratedTrack] = useState<string | null>(null);
+  const [generatedMusic, setGeneratedMusic] = useState<GeneratedMusic | null>(null);
+  const [duration, setDuration] = useState(10);
   const { toast } = useToast();
 
   const generateMusic = async () => {
@@ -23,26 +25,41 @@ const MusicGenerator = () => {
 
     setIsGenerating(true);
     
-    // Simulate AI music generation (replace with actual API call)
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log('Starting music generation...');
+      const result = await MusicGenerationService.generateMusic({
+        prompt,
+        duration,
+        model: "facebook/musicgen-medium"
+      });
       
-      // For demo purposes, we'll use a placeholder audio URL
-      setGeneratedTrack("https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav");
+      setGeneratedMusic(result);
       
       toast({
         title: "Music Generated!",
         description: "Your AI-generated track is ready to mint as an NFT"
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Music generation failed:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate music. Please try again.",
+        description: error.message || "Failed to generate music. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const downloadAudio = () => {
+    if (!generatedMusic) return;
+    
+    const link = document.createElement('a');
+    link.href = generatedMusic.audioData;
+    link.download = `beatchain-${Date.now()}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -58,17 +75,36 @@ const MusicGenerator = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="music-prompt" className="text-sm font-medium">
-              Music Description
-            </label>
-            <Textarea
-              id="music-prompt"
-              placeholder="Example: Chill lo-fi beats with piano and rain sounds, ambient atmosphere, 120 BPM"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="min-h-[100px] bg-background/50"
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="music-prompt" className="text-sm font-medium">
+                Music Description
+              </label>
+              <Textarea
+                id="music-prompt"
+                placeholder="Example: Chill lo-fi beats with piano and rain sounds, ambient atmosphere, 120 BPM"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="min-h-[100px] bg-background/50"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="duration" className="text-sm font-medium">
+                Duration (seconds)
+              </label>
+              <select
+                id="duration"
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="w-full p-2 rounded-md bg-background/50 border border-border"
+              >
+                <option value={5}>5 seconds</option>
+                <option value={10}>10 seconds</option>
+                <option value={15}>15 seconds</option>
+                <option value={30}>30 seconds</option>
+              </select>
+            </div>
           </div>
 
           <Button
@@ -91,12 +127,28 @@ const MusicGenerator = () => {
             )}
           </Button>
 
-          {generatedTrack && (
-            <div className="space-y-4 p-4 bg-secondary/20 rounded-lg border border-border/50">
-              <h3 className="font-semibold">Generated Track</h3>
+          {generatedMusic && (
+            <div className="space-y-4 p-6 bg-secondary/20 rounded-lg border border-border/50">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">Generated Track</h3>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={downloadAudio}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="bg-background/50 rounded-lg p-3">
+                <p className="text-sm text-muted-foreground mb-2">Prompt: "{generatedMusic.prompt}"</p>
+                <p className="text-xs text-muted-foreground">Model: {generatedMusic.model} • Duration: {generatedMusic.duration}s</p>
+              </div>
+
               <audio
                 controls
-                src={generatedTrack}
+                src={generatedMusic.audioData}
                 className="w-full"
                 style={{
                   filter: "hue-rotate(270deg) saturate(1.5)",
@@ -105,6 +157,7 @@ const MusicGenerator = () => {
               >
                 Your browser does not support the audio element.
               </audio>
+              
               <div className="flex gap-2">
                 <Button variant="hero" size="sm" className="flex-1">
                   Mint as NFT
