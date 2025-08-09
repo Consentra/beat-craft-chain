@@ -321,18 +321,19 @@ contract BeatChainMarketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         }
     }
 
-    /**
-     * @dev Transfer ETH with fallback to credit system
-     */
-    function _transferETHWithFallback(address payable to, uint256 amount) internal {
-        try to.call{value: amount}("") returns (bool success) {
-            if (!success) {
-                failedTransferCredits[to] += amount;
-            }
-        } catch {
+/**
+ * @dev Transfer ETH with fallback to credit system
+ */
+function _transferETHWithFallback(address payable to, uint256 amount) internal {
+    try IERC721Receiver(to).onERC721Received(address(0), address(0), 0, "") returns (bytes4 returnValue) {
+        // Check if the returned value is the magic value for success
+        if (returnValue != IERC721Receiver.onERC721Received.selector) {
             failedTransferCredits[to] += amount;
         }
+    } catch {
+        failedTransferCredits[to] += amount;
     }
+}
 
     /**
      * @dev Withdraw failed transfer credits
