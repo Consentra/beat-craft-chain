@@ -113,13 +113,17 @@ contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, Reent
         return tokenIds;
     }
     
-    /**
-     * @dev Get music metadata for a token
-     */
-    function getMusicMetadata(uint256 tokenId) external view returns (MusicMetadata memory) {
-        require(_exists(tokenId), "Token does not exist");
+/**
+ * @dev Get music metadata for a token
+ */
+function getMusicMetadata(uint256 tokenId) external view returns (MusicMetadata memory) {
+    // Check if the token exists by attempting to get its owner
+    try this.ownerOf(tokenId) {
         return musicMetadata[tokenId];
+    } catch {
+        revert("Token does not exist");
     }
+}
     
     /**
      * @dev Update platform fee recipient (only owner)
@@ -135,16 +139,16 @@ contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, Reent
         return _tokenIdCounter;
     }
     
-    // Required overrides
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage, ERC721Royalty) {
-        super._burn(tokenId);
-    }
+// Remove the _burn function override
+// function _burn(uint256 tokenId) internal override(ERC721) {
+//     super._burn(tokenId);
+// }
     
     function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
     
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Royalty) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
+function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage, ERC721Royalty) returns (bool) {
+    return super.supportsInterface(interfaceId);
+}
 }
