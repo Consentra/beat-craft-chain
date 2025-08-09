@@ -92,7 +92,7 @@ contract BeatChainMarketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         uint256 winningBid
     );
 
-    constructor(address payable _platformFeeRecipient) {
+    constructor(address payable _platformFeeRecipient) Ownable(msg.sender) {
         platformFeeRecipient = _platformFeeRecipient;
     }
 
@@ -325,7 +325,11 @@ contract BeatChainMarketplace is ReentrancyGuard, Ownable, IERC721Receiver {
      * @dev Transfer ETH with fallback to credit system
      */
     function _transferETHWithFallback(address payable to, uint256 amount) internal {
-        if (!to.sendValue(amount)) {
+        try to.call{value: amount}("") returns (bool success) {
+            if (!success) {
+                failedTransferCredits[to] += amount;
+            }
+        } catch {
             failedTransferCredits[to] += amount;
         }
     }
@@ -338,7 +342,8 @@ contract BeatChainMarketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         require(amount > 0, "No credits to withdraw");
 
         failedTransferCredits[msg.sender] = 0;
-        payable(msg.sender).sendValue(amount);
+        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        require(success, "Transfer failed");
     }
 
     /**

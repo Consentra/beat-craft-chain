@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
@@ -13,9 +13,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * @dev ERC721 contract for AI-generated music NFTs with royalty support
  */
 contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, ReentrancyGuard {
-    using Counters for Counters.Counter;
-
-    Counters.Counter private _tokenIdCounter;
+    
+    uint256 private _tokenIdCounter;
     
     // Platform fee (in basis points, 250 = 2.5%)
     uint96 public constant PLATFORM_FEE = 250;
@@ -52,7 +51,7 @@ contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, Reent
         string memory name,
         string memory symbol,
         address _platformFeeRecipient
-    ) ERC721(name, symbol) {
+    ) ERC721(name, symbol) Ownable(msg.sender) {
         platformFeeRecipient = _platformFeeRecipient;
     }
     
@@ -71,8 +70,8 @@ contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, Reent
     ) public nonReentrant returns (uint256) {
         require(royaltyFee <= 1000, "Royalty fee too high"); // Max 10%
         
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter;
+        _tokenIdCounter++;
         
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
@@ -133,7 +132,7 @@ contract BeatChainNFT is ERC721, ERC721URIStorage, ERC721Royalty, Ownable, Reent
      * @dev Get total supply of minted tokens
      */
     function totalSupply() external view returns (uint256) {
-        return _tokenIdCounter.current();
+        return _tokenIdCounter;
     }
     
     // Required overrides

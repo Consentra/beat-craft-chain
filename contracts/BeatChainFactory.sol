@@ -56,7 +56,7 @@ contract BeatChainFactory is Ownable, ReentrancyGuard {
     
     event CollectionStatusChanged(address indexed collection, bool isActive);
     
-    constructor(address payable _platformFeeRecipient) {
+    constructor(address payable _platformFeeRecipient) Ownable(msg.sender) {
         platformFeeRecipient = _platformFeeRecipient;
     }
     
