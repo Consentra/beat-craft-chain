@@ -47,6 +47,14 @@ const Navigation = () => {
               Gallery
             </Link>
             <Link 
+              to="/factory" 
+              className={`transition-colors ${
+                location.pathname === '/factory' ? 'text-primary' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              Factory
+            </Link>
+            <Link 
               to="/about" 
               className={`transition-colors ${
                 location.pathname === '/about' ? 'text-primary' : 'text-foreground hover:text-primary'
@@ -105,6 +113,15 @@ const Navigation = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Gallery
+              </Link>
+              <Link 
+                to="/factory" 
+                className={`py-2 transition-colors ${
+                  location.pathname === '/factory' ? 'text-primary' : 'text-foreground hover:text-primary'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Factory
               </Link>
               <Link 
                 to="/about" 

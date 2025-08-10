@@ -14,6 +14,7 @@ import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
 import GalleryPage from "./pages/GalleryPage";
 import AboutPage from "./pages/AboutPage";
+import FactoryPage from "./pages/FactoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/create" element={<CreatePage />} />
                 <Route path="/gallery" element={<GalleryPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/factory" element={<FactoryPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

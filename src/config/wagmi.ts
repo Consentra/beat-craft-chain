@@ -46,12 +46,35 @@ export const lazAITestnet = {
   testnet: true,
 }
 
+export const seiEvmTestnet = {
+  id: 1328,
+  name: 'SeiEVM Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'SEI',
+    symbol: 'SEI',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://evm-rpc-testnet.sei-apis.com'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'SeiEVM Explorer',
+      url: 'https://testnet.seistream.app',
+    },
+  },
+  testnet: true,
+}
+
 export const config = getDefaultConfig({
   appName: 'BeatChain - AI Music NFT Platform',
   projectId: 'beatchain-music-nft-platform',
-  chains: [hyperionTestnet, lazAITestnet],
+  chains: [hyperionTestnet, lazAITestnet, seiEvmTestnet],
   transports: {
     [hyperionTestnet.id]: http(),
     [lazAITestnet.id]: http(),
+    [seiEvmTestnet.id]: http(),
   },
 })
